@@ -1,6 +1,6 @@
 import { Product, Sale, User } from "./api";
 
-export const DEMO_MODE = true;
+export const DEMO_MODE = false;
 
 export const demoProducts: Product[] = [
   { id: 1, name: "Base Líquida Matte", costPrice: 89.90, stock: 24 },
