@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { DEMO_MODE } from "@/lib/demo-data";
 
 interface AuthUser {
   role: "ADMIN" | "USER";
@@ -27,17 +28,26 @@ function parseJwt(token: string): Record<string, any> | null {
   }
 }
 
+const demoUser: AuthUser = {
+  role: "ADMIN",
+  email: "alice@aliceglow.com",
+  name: "Alice Glow",
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem("aliceglow_token")
+    DEMO_MODE ? "demo" : localStorage.getItem("aliceglow_token")
   );
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(DEMO_MODE ? demoUser : null);
 
   useEffect(() => {
+    if (DEMO_MODE) {
+      setUser(demoUser);
+      return;
+    }
     if (token) {
       const payload = parseJwt(token);
       if (payload) {
-        // Check expiry
         if (payload.exp && payload.exp * 1000 < Date.now()) {
           logout();
           return;

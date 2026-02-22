@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { api, Product, Sale } from "@/lib/api";
+import { api } from "@/lib/api";
+import { DEMO_MODE, demoProducts, demoSales } from "@/lib/demo-data";
+import type { Product, Sale } from "@/lib/api";
 import { Package, ShoppingCart, DollarSign } from "lucide-react";
 
 const Dashboard = () => {
@@ -8,11 +10,14 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (DEMO_MODE) {
+      setProducts(demoProducts);
+      setSales(demoSales);
+      setLoading(false);
+      return;
+    }
     Promise.all([api.getProducts(), api.getSales()])
-      .then(([p, s]) => {
-        setProducts(p);
-        setSales(s);
-      })
+      .then(([p, s]) => { setProducts(p); setSales(s); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -24,27 +29,9 @@ const Dashboard = () => {
   const revenueToday = salesToday.reduce((sum, s) => sum + (s.totalValue || 0), 0);
 
   const cards = [
-    {
-      title: "Total de Produtos",
-      value: products.length,
-      icon: Package,
-      color: "text-primary",
-      bg: "bg-primary/10",
-    },
-    {
-      title: "Vendas Hoje",
-      value: salesToday.length,
-      icon: ShoppingCart,
-      color: "text-success",
-      bg: "bg-success/10",
-    },
-    {
-      title: "Receita Hoje",
-      value: `R$ ${revenueToday.toFixed(2)}`,
-      icon: DollarSign,
-      color: "text-accent",
-      bg: "bg-accent/10",
-    },
+    { title: "Total de Produtos", value: products.length, icon: Package, color: "text-primary", bg: "bg-primary/10" },
+    { title: "Vendas Hoje", value: salesToday.length, icon: ShoppingCart, color: "text-success", bg: "bg-success/10" },
+    { title: "Receita Hoje", value: `R$ ${revenueToday.toFixed(2)}`, icon: DollarSign, color: "text-accent", bg: "bg-accent/10" },
   ];
 
   if (loading) {
@@ -61,13 +48,9 @@ const Dashboard = () => {
         <h1 className="text-2xl font-display font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">Visão geral do sistema</p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {cards.map((card) => (
-          <div
-            key={card.title}
-            className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow"
-          >
+          <div key={card.title} className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm text-muted-foreground">{card.title}</span>
               <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center`}>
